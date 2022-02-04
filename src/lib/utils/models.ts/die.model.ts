@@ -6,4 +6,5 @@ export interface Die {
 	position: Vector3DHelper;
 	velocity: Vector3DHelper;
 	rotation: Vector3DHelper;
+	color: string;
 }

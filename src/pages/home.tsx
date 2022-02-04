@@ -21,9 +21,10 @@ const Plane = (props: any) => {
 
 type IcosahedronProps = ConvexPolyhedronProps & {
 	size: number;
+	color: string;
 };
 
-const Icosahedron = ({ size, ...props }: IcosahedronProps) => {
+const Icosahedron = ({ size, color, ...props }: IcosahedronProps) => {
 	const geometry = useMemo(() => new THREE.IcosahedronGeometry(size, 0), [size]);
 	const args = useMemo(() => toConvexProps(geometry), [geometry]);
 	const [ref, api] = useConvexPolyhedron(() => ({ args, mass: 1, ...props }));
@@ -41,7 +42,7 @@ const Icosahedron = ({ size, ...props }: IcosahedronProps) => {
 	return (
 		<mesh ref={ref} castShadow receiveShadow>
 			<icosahedronBufferGeometry attach="geometry" args={[size, 0]} />
-			<meshNormalMaterial attach="material" />
+			<meshStandardMaterial attach="material" color={color} />
 		</mesh>
 	);
 };
@@ -60,6 +61,7 @@ export const Home = () => {
 
 	const throwDice = () => {
 		const generatedDice = [];
+		const colors = ['red', 'purple', 'yellow', 'green', 'blue'];
 
 		for (var i = 0; i < 5; i++) {
 			const yRandom = Math.random() * 20;
@@ -77,6 +79,7 @@ export const Home = () => {
 				position: [xPosition, yPosition, zPosition],
 				velocity: [xVelocity, yVelocity, zVelocity],
 				rotation: [0, 0, 0],
+				color: colors[i],
 			};
 
 			generatedDice.push(die);
@@ -88,11 +91,11 @@ export const Home = () => {
 	return (
 		<div>
 			<Canvas shadows dpr={window.devicePixelRatio} style={{ width: 500, height: 500, margin: '0 auto' }}>
-				<color attach="background" args={['hotpink']} />
+				<color attach="background" args={['#F7F7F7']} />
 
 				<hemisphereLight intensity={0.35} />
 				<SpotLight
-					position={[24, 56, 24]}
+					position={[0, 56, 0]}
 					angle={0.5}
 					penumbra={1}
 					intensity={1}
@@ -112,12 +115,13 @@ export const Home = () => {
 								position={die.position}
 								velocity={die.velocity}
 								rotation={die.rotation}
+								color={die.color}
 							/>
 						);
 					})}
 				</Physics>
 
-				<PerspectiveCamera makeDefault ref={camera} position={[0, 50, 0]} />
+				<PerspectiveCamera makeDefault ref={camera} position={[0, 24, 24]} />
 				<OrbitControls camera={camera.current} />
 				<Stats />
 			</Canvas>
