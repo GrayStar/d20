@@ -1,14 +1,14 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import * as THREE from 'three';
 import { Canvas, useFrame } from '@react-three/fiber';
-import { OrbitControls, OrthographicCamera, PerspectiveCamera, Stats } from '@react-three/drei';
-import { ConvexPolyhedronProps, Physics, usePlane, useConvexPolyhedron } from '@react-three/cannon';
+import { OrbitControls, PerspectiveCamera, Stats } from '@react-three/drei';
+import { ConvexPolyhedronProps, Physics, usePlane, useConvexPolyhedron, PlaneProps } from '@react-three/cannon';
 
 import { generateDie, toConvexProps } from '@/lib/utils';
 import { SpotLight } from '@/components/spot-light';
 import { Die } from '@/lib/models';
 
-const Plane = (props: any) => {
+const Plane = (props: PlaneProps) => {
 	const [ref] = usePlane(() => ({
 		rotation: [-Math.PI / 2, 0, 0],
 		...props,
@@ -16,8 +16,8 @@ const Plane = (props: any) => {
 
 	return (
 		<mesh ref={ref} receiveShadow>
-			<planeBufferGeometry args={[2048, 2048]} />
-			<shadowMaterial color="#000000" opacity={0.12} />
+			<planeBufferGeometry attach="geometry" args={[2048, 2048]} />
+			<shadowMaterial attach="material" color="#000000" opacity={0.12} />
 		</mesh>
 	);
 };
