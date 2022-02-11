@@ -6,7 +6,7 @@ import { useHelper } from '@react-three/drei';
 
 export function SpotLight(props: SpotLightProps) {
 	const spotLightRef = useRef();
-	// useHelper(spotLightRef, SpotLightHelper, 'hotpink');
+	useHelper(spotLightRef, SpotLightHelper, 'hotpink');
 
 	return <spotLight ref={spotLightRef} {...props} />;
 }
