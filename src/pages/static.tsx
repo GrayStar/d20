@@ -1,7 +1,7 @@
-import React, { useEffect, useMemo, useRef } from 'react';
+import React, { useEffect, useRef } from 'react';
 import * as THREE from 'three';
 import { Canvas, useFrame } from '@react-three/fiber';
-import { Icosahedron as IcosahedronMesh, OrbitControls, PerspectiveCamera, Stats } from '@react-three/drei';
+import { OrbitControls, PerspectiveCamera, Stats } from '@react-three/drei';
 
 import { useTexture } from '@/hooks';
 import { SpotLight } from '@/components';
@@ -10,27 +10,14 @@ const Icosahedron = () => {
 	const numberOfFaces = useRef(20).current;
 	const texture = useTexture(numberOfFaces, { color: 'white', backgroundColor: '#3C6891', fontSize: 32 });
 
-	const mesh = useRef<THREE.Mesh>();
-	const geometry = useMemo(() => new THREE.IcosahedronBufferGeometry(1, 0), []);
-	const material = useMemo(() => {
-		return new THREE.MeshPhongMaterial({
-			map: texture,
-			...(texture && {
-				onBeforeCompile: (shader: THREE.Shader) => {
-					shader.vertexShader = `
-                        attribute float sides;
-                        ${shader.vertexShader}
-                    `.replace(
-						`#include <uv_vertex>`,
-						`#include <uv_vertex>
-                        vUv.x = (1./${numberOfFaces}.) * (vUv.x + sides);`
-					);
-				},
-			}),
-		});
-	}, [numberOfFaces, texture]);
+	const meshRef = useRef<THREE.Mesh>();
+	const geometryRef = useRef<THREE.IcosahedronBufferGeometry>();
 
 	useEffect(() => {
+		if (!geometryRef.current) {
+			return;
+		}
+
 		const numberOfFaceSides = 3;
 		const base = new THREE.Vector2(0, 0.5);
 		const center = new THREE.Vector2(0, 0);
@@ -54,28 +41,37 @@ const Icosahedron = () => {
 			sides.push(i, i, i);
 		}
 
-		geometry.setAttribute('uv', new THREE.Float32BufferAttribute(uvs, 2));
-		geometry.setAttribute('sides', new THREE.Float32BufferAttribute(sides, 1));
-	}, [geometry, numberOfFaces]);
+		geometryRef.current.setAttribute('uv', new THREE.Float32BufferAttribute(uvs, 2));
+		geometryRef.current.setAttribute('sides', new THREE.Float32BufferAttribute(sides, 1));
+	}, [numberOfFaces]);
 
 	useFrame(() => {
-		if (!mesh.current) {
+		if (!meshRef.current) {
 			return;
 		}
 
-		mesh.current.rotation.y += 0.01;
-		mesh.current.rotation.z += 0.01;
+		meshRef.current.rotation.y += 0.01;
+		meshRef.current.rotation.z += 0.01;
 	});
 
 	return (
-		<IcosahedronMesh
-			ref={mesh}
-			castShadow
-			receiveShadow
-			geometry={geometry}
-			material={material}
-			position={[0, 1, 0]}
-		/>
+		<mesh ref={meshRef}>
+			<icosahedronBufferGeometry ref={geometryRef} attach="geometry" args={[1, 0]} />
+			<meshPhongMaterial
+				attach="material"
+				map={texture}
+				onBeforeCompile={(shader) => {
+					shader.vertexShader = `
+                        attribute float sides;
+                        ${shader.vertexShader}
+                    `.replace(
+						`#include <uv_vertex>`,
+						`#include <uv_vertex>
+                        vUv.x = (1./${numberOfFaces}.) * (vUv.x + sides);`
+					);
+				}}
+			/>
+		</mesh>
 	);
 };
 
