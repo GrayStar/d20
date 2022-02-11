@@ -51,6 +51,11 @@ const Icosahedron = ({ size, color, isFinished, onIsFinishedChange, ...props }: 
 		return api.angularVelocity.subscribe((av) => (angularVelocityRef.current = av));
 	}, [api.angularVelocity]);
 
+	const rotationRef = useRef([0, 0, 0]);
+	useEffect(() => {
+		return api.rotation.subscribe((r) => (rotationRef.current = r));
+	}, [api.rotation]);
+
 	/* Helper to check if dice is finished rolling */
 	const checkIsFinished = useCallback(() => {
 		const threshold = 0.1;
@@ -65,6 +70,8 @@ const Icosahedron = ({ size, color, isFinished, onIsFinishedChange, ...props }: 
 	useFrame(() => {
 		if (checkIsFinished() && !isFinished) {
 			onIsFinishedChange(true);
+
+			console.log(rotationRef.current);
 		}
 
 		if (!checkIsFinished() && isFinished) {
@@ -105,7 +112,7 @@ export const Home = () => {
 	const throwDice = () => {
 		const generatedDice = [];
 
-		for (var i = 0; i < 5; i++) {
+		for (var i = 0; i < 1; i++) {
 			generatedDice.push(generateDie(i));
 		}
 

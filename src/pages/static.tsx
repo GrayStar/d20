@@ -6,6 +6,15 @@ import { OrbitControls, PerspectiveCamera, Stats } from '@react-three/drei';
 import { useTexture } from '@/hooks';
 import { SpotLight } from '@/components';
 
+function Plane() {
+	return (
+		<mesh receiveShadow rotation={[-Math.PI / 2, 0, 0]} scale={[10, 10, 10]} position={[0, -1, 0]}>
+			<planeBufferGeometry attach="geometry" />
+			<shadowMaterial attach="material" color="#000000" opacity={0.12} />
+		</mesh>
+	);
+}
+
 const Icosahedron = () => {
 	const numberOfFaces = useRef(20).current;
 	const texture = useTexture(numberOfFaces, { color: 'white', backgroundColor: '#3C6891', fontSize: 32 });
@@ -50,12 +59,12 @@ const Icosahedron = () => {
 			return;
 		}
 
+		meshRef.current.rotation.x += 0.01;
 		meshRef.current.rotation.y += 0.01;
-		meshRef.current.rotation.z += 0.01;
 	});
 
 	return (
-		<mesh ref={meshRef}>
+		<mesh ref={meshRef} castShadow receiveShadow position={[0, 0, 0]}>
 			<icosahedronBufferGeometry ref={geometryRef} attach="geometry" args={[1, 0]} />
 			<meshPhongMaterial
 				attach="material"
@@ -80,12 +89,12 @@ export const Static = () => {
 
 	return (
 		<div>
-			<Canvas shadows dpr={window.devicePixelRatio} style={{ width: 500, height: 500, margin: '0 auto' }}>
-				<color attach="background" args={['gray']} />
+			<Canvas shadows dpr={window.devicePixelRatio} style={{ width: 300, height: 300, margin: '0 auto' }}>
+				<color attach="background" args={['#F2F3F3']} />
 
 				<hemisphereLight intensity={0.35} />
 				<SpotLight
-					position={[0, 16, 0]}
+					position={[-4, 8, -4]}
 					angle={0.5}
 					penumbra={1}
 					intensity={1}
@@ -94,10 +103,10 @@ export const Static = () => {
 					shadow-mapSize-height={2048}
 				/>
 
+				<Plane />
 				<Icosahedron />
-				<gridHelper args={[10, 10, `white`, `gray`]} />
 
-				<PerspectiveCamera makeDefault ref={camera} position={[0, 8, 0]} />
+				<PerspectiveCamera makeDefault ref={camera} position={[0, 4, 0]} />
 				<OrbitControls camera={camera.current} />
 				<Stats />
 			</Canvas>
