@@ -78,6 +78,12 @@ export const D20 = ({ value, color, backgroundColor }: D20Props) => {
 			return;
 		}
 
+		if (value === 0) {
+			meshRef.current.rotation.x += 0.1;
+			meshRef.current.rotation.y += 0.1;
+			return;
+		}
+
 		const targetRotation = values[value];
 		const [xRotation, yRotation, zRotation] = targetRotation;
 
