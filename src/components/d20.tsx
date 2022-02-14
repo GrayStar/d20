@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useMemo, useRef } from 'react';
 import { useFrame } from '@react-three/fiber';
 
 import { useDiceTexture } from '@/hooks';
@@ -40,6 +40,20 @@ export const D20 = ({ value, color, backgroundColor }: D20Props) => {
 	const meshRef = useRef<THREE.Mesh>();
 	const geometryRef = useRef<THREE.IcosahedronBufferGeometry>();
 
+	const targetQuaternion = useMemo(() => {
+		if (value === 0) {
+			return new THREE.Quaternion();
+		}
+
+		const targetRotation = values[value];
+		const [xRotation, yRotation, zRotation] = targetRotation;
+
+		const targetVector = new THREE.Vector3(xRotation, yRotation, zRotation);
+		const targetEuler = new THREE.Euler().setFromVector3(targetVector);
+
+		return new THREE.Quaternion().setFromEuler(targetEuler);
+	}, [value]);
+
 	useEffect(() => {
 		if (!geometryRef.current) {
 			return;
@@ -79,19 +93,12 @@ export const D20 = ({ value, color, backgroundColor }: D20Props) => {
 		}
 
 		if (value === 0) {
-			meshRef.current.rotation.x += 0.1;
-			meshRef.current.rotation.y += 0.1;
+			meshRef.current.rotation.x += 0.01;
+			meshRef.current.rotation.y += 0.01;
 			return;
 		}
 
-		const targetRotation = values[value];
-		const [xRotation, yRotation, zRotation] = targetRotation;
-
-		const targetVector = new THREE.Vector3(xRotation, yRotation, zRotation);
-		const targetEuler = new THREE.Euler().setFromVector3(targetVector);
-		const targetQuaternion = new THREE.Quaternion().setFromEuler(targetEuler);
-
-		meshRef.current.quaternion.slerp(targetQuaternion, 0.2);
+		meshRef.current.quaternion.slerp(targetQuaternion, 0.1);
 	});
 
 	return (
