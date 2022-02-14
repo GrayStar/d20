@@ -1,6 +1,6 @@
 import React, { useRef, useState } from 'react';
 import { Canvas } from '@react-three/fiber';
-import { OrbitControls, PerspectiveCamera, Stats } from '@react-three/drei';
+import { OrbitControls, OrthographicCamera, PerspectiveCamera, Stats } from '@react-three/drei';
 
 import { D20 } from '@/components';
 
@@ -13,7 +13,7 @@ function Plane() {
 	);
 }
 
-const buttons = Array.apply(null, Array(20)).map(function (x, i) {
+const buttons = Array.apply(null, Array(20)).map(function (_x, i) {
 	return i + 1;
 });
 
@@ -28,7 +28,7 @@ export const Static = () => {
 
 				<hemisphereLight intensity={0.35} />
 				<spotLight
-					position={[-2, 8, -2]}
+					position={[-2, 6, -2]}
 					angle={0.5}
 					penumbra={0}
 					intensity={4}
@@ -38,10 +38,10 @@ export const Static = () => {
 					shadow-mapSize-height={2048}
 				/>
 
-				<Plane />
 				<D20 value={value} color="#AAAAAA" backgroundColor="#2B2B2B" />
+				<Plane />
 
-				<PerspectiveCamera makeDefault ref={camera} position={[0, 4, 0]} />
+				<OrthographicCamera makeDefault ref={camera} position={[0, 8, 0]} zoom={48} />
 				<OrbitControls camera={camera.current} />
 				<Stats />
 			</Canvas>
@@ -54,7 +54,12 @@ export const Static = () => {
 							onClick={() => {
 								setValue(val);
 							}}
-							style={{ border: 0, backgroundColor: value === val ? '#ED7474' : 'white' }}
+							style={{
+								border: 0,
+								borderRadius: 4,
+								color: value === val ? 'white' : 'black',
+								backgroundColor: value === val ? '#3654DA' : 'white',
+							}}
 						>
 							{val}
 						</button>
