@@ -14,9 +14,10 @@ export const useDiceTexture = (numberOfFaces: number, { color, backgroundColor, 
 		return null;
 	}
 
-	const step = 128;
-	canvas.width = step * numberOfFaces;
-	canvas.height = step;
+	// size of the texture for one face of the die
+	const size = 128;
+	canvas.width = size * numberOfFaces;
+	canvas.height = size;
 
 	ctx.fillStyle = backgroundColor;
 	ctx.fillRect(0, 0, canvas.width, canvas.height);
@@ -27,14 +28,22 @@ export const useDiceTexture = (numberOfFaces: number, { color, backgroundColor, 
 
 	for (let i = 0; i < numberOfFaces; i++) {
 		const currentNumber = i + 1;
+		const xOffset = size * i;
 
-		ctx.fillText(String(currentNumber), step * 0.5 + step * i, step * 0.5);
+		// Since the textAlign and textBaseline are centered,
+		// draw the text right in the center
+		const center = size * 0.5;
 
+		ctx.fillText(String(currentNumber), center + xOffset, center);
+
+		// Underline the six and nine so users can tell which is which
 		if (currentNumber === 6 || currentNumber === 9) {
 			const { width } = ctx.measureText(String(currentNumber));
+			const halfWidth = width * 0.5;
 			const height = 2;
-			const xPosition = step * 0.5 + step * i - width * 0.5;
-			const yPosition = step * 0.5 + fontSize * 0.5;
+
+			const xPosition = center + xOffset - halfWidth;
+			const yPosition = center + fontSize * 0.5;
 
 			ctx.fillRect(xPosition, yPosition, width, height);
 		}

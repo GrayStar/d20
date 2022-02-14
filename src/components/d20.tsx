@@ -1,8 +1,8 @@
 import * as THREE from 'three';
 import React, { useEffect, useRef } from 'react';
+import { useFrame } from '@react-three/fiber';
 
 import { useDiceTexture } from '@/hooks';
-import { useFrame } from '@react-three/fiber';
 
 const values: Record<number, [number, number, number]> = {
 	1: [-2.053790729917857, 0.8578087169477046, 1.3938591907844389],
@@ -35,7 +35,7 @@ interface D20Props {
 
 export const D20 = ({ value, color, backgroundColor }: D20Props) => {
 	const numberOfFaces = useRef(20).current;
-	const texture = useDiceTexture(numberOfFaces, { color, backgroundColor, fontSize: 40 });
+	const diceTexture = useDiceTexture(numberOfFaces, { color, backgroundColor, fontSize: 40 });
 
 	const meshRef = useRef<THREE.Mesh>();
 	const geometryRef = useRef<THREE.IcosahedronBufferGeometry>();
@@ -45,17 +45,17 @@ export const D20 = ({ value, color, backgroundColor }: D20Props) => {
 			return;
 		}
 
-		const numberOfFaceSides = 3;
+		const edgesPerFace = 3;
 		const base = new THREE.Vector2(0, 0.5);
 		const center = new THREE.Vector2(0, 0);
-		const angle = THREE.MathUtils.degToRad(360 / numberOfFaceSides);
+		const externalAngleOfFace = THREE.MathUtils.degToRad(360 / edgesPerFace);
 		const baseUVs = [];
 
-		for (let i = 0; i < numberOfFaceSides; i++) {
+		for (let i = 0; i < edgesPerFace; i++) {
 			baseUVs.push(
 				base
 					.clone()
-					.rotateAround(center, angle * (i + 1))
+					.rotateAround(center, externalAngleOfFace * (i + 1))
 					.addScalar(0.5)
 			);
 		}
@@ -64,7 +64,8 @@ export const D20 = ({ value, color, backgroundColor }: D20Props) => {
 		const sides: number[] = [];
 
 		for (let i = 0; i < numberOfFaces; i++) {
-			uvs.push(baseUVs[1].x, baseUVs[1].y, baseUVs[2].x, baseUVs[2].y, baseUVs[0].x, baseUVs[0].y);
+			const [vertex0, vertex1, vertex2] = baseUVs;
+			uvs.push(vertex1.x, vertex1.y, vertex2.x, vertex2.y, vertex0.x, vertex0.y);
 			sides.push(i, i, i);
 		}
 
@@ -77,8 +78,11 @@ export const D20 = ({ value, color, backgroundColor }: D20Props) => {
 			return;
 		}
 
-		const targetRotation = new THREE.Vector3(values[value][0], values[value][1], values[value][2]);
-		const targetEuler = new THREE.Euler().setFromVector3(targetRotation);
+		const targetRotation = values[value];
+		const [xRotation, yRotation, zRotation] = targetRotation;
+
+		const targetVector = new THREE.Vector3(xRotation, yRotation, zRotation);
+		const targetEuler = new THREE.Euler().setFromVector3(targetVector);
 		const targetQuaternion = new THREE.Quaternion().setFromEuler(targetEuler);
 
 		meshRef.current.quaternion.slerp(targetQuaternion, 0.2);
@@ -89,17 +93,17 @@ export const D20 = ({ value, color, backgroundColor }: D20Props) => {
 			<icosahedronBufferGeometry ref={geometryRef} attach="geometry" args={[1, 0]} />
 			<meshPhongMaterial
 				attach="material"
-				map={texture}
+				map={diceTexture}
 				shininess={40}
 				specular={0x172022}
 				onBeforeCompile={(shader) => {
 					shader.vertexShader = `
-                        attribute float sides;
-                        ${shader.vertexShader}
-                    `.replace(
+						attribute float sides;
+						${shader.vertexShader}
+					`.replace(
 						`#include <uv_vertex>`,
 						`#include <uv_vertex>
-                        vUv.x = (1./${numberOfFaces}.) * (vUv.x + sides);`
+						vUv.x = (1./${numberOfFaces}.) * (vUv.x + sides);`
 					);
 				}}
 			/>
