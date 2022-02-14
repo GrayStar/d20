@@ -29,11 +29,13 @@ const values: Record<number, [number, number, number]> = {
 
 interface D20Props {
 	value: number;
+	color: string;
+	backgroundColor: string;
 }
 
-export const D20 = ({ value }: D20Props) => {
+export const D20 = ({ value, color, backgroundColor }: D20Props) => {
 	const numberOfFaces = useRef(20).current;
-	const texture = useDiceTexture(numberOfFaces, { color: '#AAAAAA', backgroundColor: '#202020', fontSize: 40 });
+	const texture = useDiceTexture(numberOfFaces, { color, backgroundColor, fontSize: 40 });
 
 	const meshRef = useRef<THREE.Mesh>();
 	const geometryRef = useRef<THREE.IcosahedronBufferGeometry>();

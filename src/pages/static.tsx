@@ -2,7 +2,7 @@ import React, { useRef, useState } from 'react';
 import { Canvas } from '@react-three/fiber';
 import { OrbitControls, PerspectiveCamera, Stats } from '@react-three/drei';
 
-import { D20, SpotLight } from '@/components';
+import { D20 } from '@/components';
 
 function Plane() {
 	return (
@@ -27,7 +27,7 @@ export const Static = () => {
 				{/* <color attach="background" args={['#F2F3F3']} /> */}
 
 				<hemisphereLight intensity={0.35} />
-				<SpotLight
+				<spotLight
 					position={[-2, 8, -2]}
 					angle={0.5}
 					penumbra={0}
@@ -39,7 +39,7 @@ export const Static = () => {
 				/>
 
 				<Plane />
-				<D20 value={value} />
+				<D20 value={value} color="#AAAAAA" backgroundColor="#2B2B2B" />
 
 				<PerspectiveCamera makeDefault ref={camera} position={[0, 4, 0]} />
 				<OrbitControls camera={camera.current} />

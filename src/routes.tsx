@@ -1,12 +1,6 @@
-import { Home, Static } from '@/pages';
+import { Static } from '@/pages';
 
 export const routes = [
-	{
-		path: '/home',
-		exact: true,
-		private: true,
-		main: Home,
-	},
 	{
 		path: '/',
 		exact: true,
