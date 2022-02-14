@@ -7,6 +7,7 @@ import { ConvexPolyhedronProps, Physics, usePlane, useConvexPolyhedron, PlanePro
 import { generateDie, toConvexProps } from '@/lib/utils';
 import { SpotLight } from '@/components/spot-light';
 import { Die } from '@/lib/models';
+import { useDiceTexture } from '@/hooks';
 
 const Plane = (props: PlaneProps) => {
 	const [ref] = usePlane(() => ({
@@ -30,6 +31,10 @@ type IcosahedronProps = ConvexPolyhedronProps & {
 };
 
 const Icosahedron = ({ size, color, isFinished, onIsFinishedChange, ...props }: IcosahedronProps) => {
+	const numberOfFaces = useRef(20).current;
+	const texture = useDiceTexture(numberOfFaces, { color: '#AAAAAA', backgroundColor: '#202020', fontSize: 40 });
+
+	const geometryRef = useRef<THREE.IcosahedronBufferGeometry>();
 	const geometry = useMemo(() => new THREE.IcosahedronGeometry(size, 0), [size]);
 	const args = useMemo(() => toConvexProps(geometry), [geometry]);
 	const [ref, api] = useConvexPolyhedron(() => ({
@@ -38,6 +43,37 @@ const Icosahedron = ({ size, color, isFinished, onIsFinishedChange, ...props }: 
 		inertia: 0.06,
 		...props,
 	}));
+
+	useEffect(() => {
+		if (!geometryRef.current) {
+			return;
+		}
+		const numberOfFaceSides = 3;
+		const base = new THREE.Vector2(0, 0.5);
+		const center = new THREE.Vector2(0, 0);
+		const angle = THREE.MathUtils.degToRad(360 / numberOfFaceSides);
+		const baseUVs = [];
+
+		for (let i = 0; i < numberOfFaceSides; i++) {
+			baseUVs.push(
+				base
+					.clone()
+					.rotateAround(center, angle * (i + 1))
+					.addScalar(0.5)
+			);
+		}
+
+		const uvs: number[] = [];
+		const sides: number[] = [];
+
+		for (let i = 0; i < numberOfFaces; i++) {
+			uvs.push(baseUVs[1].x, baseUVs[1].y, baseUVs[2].x, baseUVs[2].y, baseUVs[0].x, baseUVs[0].y);
+			sides.push(i, i, i);
+		}
+
+		geometryRef.current.setAttribute('uv', new THREE.Float32BufferAttribute(uvs, 2));
+		geometryRef.current.setAttribute('sides', new THREE.Float32BufferAttribute(sides, 1));
+	}, [numberOfFaces]);
 
 	/* Track velocity on each frame */
 	const velocityRef = useRef([0, 0, 0]);
@@ -92,8 +128,23 @@ const Icosahedron = ({ size, color, isFinished, onIsFinishedChange, ...props }: 
 
 	return (
 		<mesh ref={ref} castShadow receiveShadow>
-			<icosahedronBufferGeometry attach="geometry" args={[size, 0]} />
-			<meshPhongMaterial attach="material" color={isFinished ? 'black' : color} />
+			<icosahedronBufferGeometry ref={geometryRef} attach="geometry" args={[size, 0]} />
+			<meshPhongMaterial
+				attach="material"
+				map={texture}
+				shininess={40}
+				specular={0x172022}
+				onBeforeCompile={(shader) => {
+					shader.vertexShader = `
+                        attribute float sides;
+                        ${shader.vertexShader}
+                    `.replace(
+						`#include <uv_vertex>`,
+						`#include <uv_vertex>
+                        vUv.x = (1./${numberOfFaces}.) * (vUv.x + sides);`
+					);
+				}}
+			/>
 		</mesh>
 	);
 };

@@ -23,7 +23,7 @@ export const Static = () => {
 
 	return (
 		<div>
-			<Canvas shadows dpr={window.devicePixelRatio} style={{ width: 300, height: 300, margin: '0 auto' }}>
+			<Canvas shadows dpr={window.devicePixelRatio} style={{ width: 200, height: 200, margin: '0 auto' }}>
 				{/* <color attach="background" args={['#F2F3F3']} /> */}
 
 				<hemisphereLight intensity={0.35} />
@@ -54,6 +54,7 @@ export const Static = () => {
 							onClick={() => {
 								setValue(val);
 							}}
+							style={{ border: 0, backgroundColor: value === val ? '#ED7474' : 'white' }}
 						>
 							{val}
 						</button>
