@@ -51,6 +51,7 @@ const Icosahedron = ({ size, color, isFinished, onIsFinishedChange, ...props }: 
 		return api.angularVelocity.subscribe((av) => (angularVelocityRef.current = av));
 	}, [api.angularVelocity]);
 
+	/* Track rotation on each frame */
 	const rotationRef = useRef([0, 0, 0]);
 	useEffect(() => {
 		return api.rotation.subscribe((r) => (rotationRef.current = r));
@@ -165,7 +166,7 @@ export const Home = () => {
 					})}
 				</Physics>
 
-				<PerspectiveCamera makeDefault ref={camera} position={[0, 24, 48]} />
+				<PerspectiveCamera makeDefault ref={camera} position={[0, 24, 0]} />
 				<OrbitControls camera={camera.current} />
 				<Stats />
 			</Canvas>

@@ -1,1 +1,1 @@
-export * from './use-texture';
+export * from './use-dice-texture';
