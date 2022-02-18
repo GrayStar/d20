@@ -1,17 +1,7 @@
 import React, { useRef, useState } from 'react';
 import { Canvas } from '@react-three/fiber';
 import { OrbitControls, OrthographicCamera, Stats } from '@react-three/drei';
-
 import { D20 } from '@/components';
-
-function Plane() {
-	return (
-		<mesh receiveShadow rotation={[-Math.PI / 2, 0, 0]} scale={[10, 10, 10]} position={[0, -1, 0]}>
-			<planeBufferGeometry attach="geometry" />
-			<shadowMaterial attach="material" color="#000000" opacity={0.12} />
-		</mesh>
-	);
-}
 
 const buttons = Array.apply(null, Array(21)).map(function (_x, i) {
 	return i;
@@ -26,7 +16,7 @@ export const Static = () => {
 
 	return (
 		<div>
-			<Canvas shadows dpr={window.devicePixelRatio} style={{ width: 200, height: 200, margin: '0 auto' }}>
+			<Canvas shadows dpr={window.devicePixelRatio} style={{ width: 48, height: 48, margin: '0 auto' }}>
 				{/* <color attach="background" args={['#F2F3F3']} /> */}
 
 				<hemisphereLight intensity={0.35} />
@@ -42,7 +32,6 @@ export const Static = () => {
 				/>
 
 				<D20 value={value} color={textColor} backgroundColor={backgroundColor} />
-				<Plane />
 
 				<OrthographicCamera makeDefault ref={camera} position={[0, 8, 0]} zoom={48} />
 				<OrbitControls camera={camera.current} />

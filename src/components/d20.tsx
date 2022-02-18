@@ -35,7 +35,7 @@ interface D20Props {
 
 export const D20 = ({ value, color, backgroundColor }: D20Props) => {
 	const numberOfFaces = useRef(20).current;
-	const diceTexture = useDiceTexture(numberOfFaces, { color, backgroundColor, fontSize: 40 });
+	const diceTexture = useDiceTexture(numberOfFaces, { color, backgroundColor, fontSize: 48 });
 
 	const meshRef = useRef<THREE.Mesh>();
 	const geometryRef = useRef<THREE.IcosahedronBufferGeometry>();
@@ -93,8 +93,8 @@ export const D20 = ({ value, color, backgroundColor }: D20Props) => {
 		}
 
 		if (value === 0) {
-			meshRef.current.rotation.x += 0.01;
-			meshRef.current.rotation.y += 0.01;
+			meshRef.current.rotation.x += 0.02;
+			meshRef.current.rotation.y += 0.02;
 			return;
 		}
 
@@ -103,7 +103,7 @@ export const D20 = ({ value, color, backgroundColor }: D20Props) => {
 
 	return (
 		<mesh ref={meshRef} castShadow receiveShadow position={[0, 0, 0]}>
-			<icosahedronBufferGeometry ref={geometryRef} attach="geometry" args={[1, 0]} />
+			<icosahedronBufferGeometry ref={geometryRef} attach="geometry" args={[0.5, 0]} />
 			<meshPhongMaterial
 				attach="material"
 				map={diceTexture}
