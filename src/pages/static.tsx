@@ -1,7 +1,7 @@
 import React, { useRef, useState } from 'react';
 import { Canvas } from '@react-three/fiber';
 import { OrbitControls, OrthographicCamera, Stats } from '@react-three/drei';
-import { D20 } from '@/components';
+import { D12, D20 } from '@/components';
 
 const buttons = Array.apply(null, Array(21)).map(function (_x, i) {
 	return i;
@@ -16,7 +16,7 @@ export const Static = () => {
 
 	return (
 		<div>
-			<Canvas shadows dpr={window.devicePixelRatio} style={{ width: 48, height: 48, margin: '0 auto' }}>
+			<Canvas shadows dpr={window.devicePixelRatio} style={{ width: 200, height: 200, margin: '0 auto' }}>
 				{/* <color attach="background" args={['#F2F3F3']} /> */}
 
 				<hemisphereLight intensity={0.35} />

@@ -27,18 +27,18 @@ const values: Record<number, [number, number, number]> = {
 	20: [0.0000925742084236608, -1.4745750016928687, 1.2037298586698615],
 };
 
-interface D20Props {
+interface D12Props {
 	value: number;
 	color: string;
 	backgroundColor: string;
 }
 
-export const D20 = ({ value, color, backgroundColor }: D20Props) => {
-	const numberOfFaces = useRef(20).current;
+export const D12 = ({ value, color, backgroundColor }: D12Props) => {
+	const numberOfFaces = useRef(12).current;
 	const diceTexture = useDiceTexture(numberOfFaces, { color, backgroundColor, fontSize: 48 });
 
 	const meshRef = useRef<THREE.Mesh>();
-	const geometryRef = useRef<THREE.IcosahedronBufferGeometry>();
+	const geometryRef = useRef<THREE.DodecahedronBufferGeometry>();
 
 	const targetQuaternion = useMemo(() => {
 		if (value === 0) {
@@ -59,21 +59,20 @@ export const D20 = ({ value, color, backgroundColor }: D20Props) => {
 			return;
 		}
 
-		const edgesPerFace = 3;
+		const edgesPerFace = 5;
 		const base = new THREE.Vector2(0, 0.5);
 		const center = new THREE.Vector2(0, 0);
 		const externalAngleOfFace = THREE.MathUtils.degToRad(360 / edgesPerFace);
-		const baseUVs = [];
+		const baseUVs: THREE.Vector2[] = [];
 
 		for (let i = 0; i < edgesPerFace; i++) {
 			baseUVs.push(
 				base
 					.clone()
-					.rotateAround(center, externalAngleOfFace * (i + 1))
+					.rotateAround(center, externalAngleOfFace * i)
 					.addScalar(0.5)
 			);
 		}
-
 		const uvs: number[] = [];
 		const sides: number[] = [];
 
@@ -113,7 +112,7 @@ export const D20 = ({ value, color, backgroundColor }: D20Props) => {
 
 	return (
 		<mesh ref={meshRef} castShadow receiveShadow position={[0, 0, 0]}>
-			<icosahedronBufferGeometry ref={geometryRef} attach="geometry" args={[0.5, 0]} />
+			<dodecahedronBufferGeometry ref={geometryRef} attach="geometry" args={[0.5, 0]} />
 			<meshPhongMaterial
 				attach="material"
 				map={diceTexture}
