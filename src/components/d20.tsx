@@ -1,8 +1,15 @@
 import * as THREE from 'three';
 import React, { useEffect, useRef } from 'react';
 
-import { useDiceTexture } from '@/hooks';
-import { useFrame } from '@react-three/fiber';
+import { useFrame, useLoader } from '@react-three/fiber';
+
+import redDie from '@/assets/textures/red-die.png';
+
+function randomInt(min: number, max: number) {
+	min = Math.ceil(min);
+	max = Math.floor(max);
+	return Math.floor(Math.random() * (max - min + 1)) + min;
+}
 
 const values: Record<number, [number, number, number]> = {
 	1: [-2.053790729917857, 0.8578087169477046, 1.3938591907844389],
@@ -29,11 +36,12 @@ const values: Record<number, [number, number, number]> = {
 
 interface D20Props {
 	value: number;
+	textureUrl?: string;
 }
 
-export const D20 = ({ value }: D20Props) => {
+export const D20 = ({ value, textureUrl }: D20Props) => {
 	const numberOfFaces = useRef(20).current;
-	const texture = useDiceTexture(numberOfFaces, { color: '#AAAAAA', backgroundColor: '#202020', fontSize: 40 });
+	const texture = useLoader(THREE.TextureLoader, textureUrl ?? redDie);
 
 	const meshRef = useRef<THREE.Mesh>();
 	const geometryRef = useRef<THREE.IcosahedronBufferGeometry>();
@@ -62,16 +70,44 @@ export const D20 = ({ value }: D20Props) => {
 		const sides: number[] = [];
 
 		for (let i = 0; i < numberOfFaces; i++) {
-			uvs.push(baseUVs[1].x, baseUVs[1].y, baseUVs[2].x, baseUVs[2].y, baseUVs[0].x, baseUVs[0].y);
-			sides.push(i, i, i);
+			const sets = baseUVs.length - 2;
+
+			for (let j = 0; j < sets; j++) {
+				const vertexA = baseUVs[j + 1];
+				const vertexB = baseUVs[j + 2];
+				const vertexC = baseUVs[0];
+
+				uvs.push(vertexA.x, vertexA.y, vertexB.x, vertexB.y, vertexC.x, vertexC.y);
+			}
+
+			for (let k = 0; k < sets * 3; k++) {
+				sides.push(i);
+			}
 		}
 
 		geometryRef.current.setAttribute('uv', new THREE.Float32BufferAttribute(uvs, 2));
 		geometryRef.current.setAttribute('sides', new THREE.Float32BufferAttribute(sides, 1));
 	}, [numberOfFaces]);
 
-	useFrame(() => {
+	useEffect(() => {
 		if (!meshRef.current) {
+			return;
+		}
+
+		meshRef.current.rotation.x = randomInt(-1, 4);
+		meshRef.current.rotation.y = randomInt(-1, 4);
+		meshRef.current.rotation.z = randomInt(-1, 4);
+	}, []);
+
+	useFrame((_state, delta) => {
+		if (!meshRef.current) {
+			return;
+		}
+
+		if (value <= 0 || value > 20) {
+			meshRef.current.rotation.x += randomInt(4, 8) * delta;
+			meshRef.current.rotation.y += randomInt(4, 8) * delta;
+			meshRef.current.rotation.z += randomInt(1, 2) * delta;
 			return;
 		}
 
@@ -79,7 +115,7 @@ export const D20 = ({ value }: D20Props) => {
 		const targetEuler = new THREE.Euler().setFromVector3(targetRotation);
 		const targetQuaternion = new THREE.Quaternion().setFromEuler(targetEuler);
 
-		meshRef.current.quaternion.slerp(targetQuaternion, 0.2);
+		meshRef.current.quaternion.slerp(targetQuaternion, 0.1);
 	});
 
 	return (
@@ -92,12 +128,12 @@ export const D20 = ({ value }: D20Props) => {
 				specular={0x172022}
 				onBeforeCompile={(shader) => {
 					shader.vertexShader = `
-                        attribute float sides;
-                        ${shader.vertexShader}
-                    `.replace(
+						attribute float sides;
+						${shader.vertexShader}
+					`.replace(
 						`#include <uv_vertex>`,
 						`#include <uv_vertex>
-                        vUv.x = (1./${numberOfFaces}.) * (vUv.x + sides);`
+						vUv.x = (1./${numberOfFaces}.) * (vUv.x + sides);`
 					);
 				}}
 			/>
